@@ -255,7 +255,7 @@ Run COMMAND, then print system resource usage.\n\
   fputs (_("  %E   elapsed real time (wall clock) in [hour:]min:sec\n"), stdout);
   fputs (_("  %e   elapsed real time (wall clock) in seconds\n"), stdout);
   fputs (_("  %F   major page faults\n"), stdout);
-  fputs (_("  %M   maximum resident set size in KB\n"), stdout);
+  fputs (_("  %M   maximum resident set size in KB, shown with 3 decimal places\n"), stdout);
   fputs (_("  %P   percent of CPU this job got\n"), stdout);
   fputs (_("  %R   minor page faults\n"), stdout);
   fputs (_("  %S   system (kernel) time in seconds\n"), stdout);
@@ -412,10 +412,10 @@ summarize (FILE *fp, const char *fmt, const char **command, RESUSE *resp)
                          (long int)((elapsed_time.tv_sec % 3600) / 60),
                          (long int)(elapsed_time.tv_sec % 60));
               else
-                fprintf (fp, "%ld:%02ld.%02ld",	/* -> m:s.  */
-                         (long int)(elapsed_time.tv_sec / 60),
-                         (long int)(elapsed_time.tv_sec % 60),
-                         (long int)(elapsed_time.tv_nsec / 10000000));
+                fprintf (fp, "%ld.%03ld",
+                       (long int)(elapsed_time.tv_sec / 60),
+                       (long int)(elapsed_time.tv_sec % 60),
+                       (long int)(elapsed_time.tv_nsec / 1000000));
               break;
 
             case 'F':		/* Major page faults.  */
@@ -436,7 +436,7 @@ summarize (FILE *fp, const char *fmt, const char **command, RESUSE *resp)
               break;
 
             case 'M': /* Maximum resident set size.  */
-              fprintf (fp, "%" PRIuMAX, get_rusage_maxrss_kb (&resp->ru));
+              fprintf (fp, "%.3f", (double) get_rusage_maxrss_kb (&resp->ru));
               break;
 
             case 'O':		/* Outputs.  */
@@ -536,9 +536,9 @@ summarize (FILE *fp, const char *fmt, const char **command, RESUSE *resp)
               break;
 
             case 'e':		/* Elapsed real time in seconds.  */
-              fprintf (fp, "%ld.%02ld",
+              fprintf (fp, "%ld.%03ld",
                        (long int)elapsed_time.tv_sec,
-                       (long int)(elapsed_time.tv_nsec / 10000000));
+                       (long int)(elapsed_time.tv_nsec / 1000000));
               break;
 
             case 'k':		/* Signals delivered.  */
