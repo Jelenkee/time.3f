@@ -1,0 +1,975 @@
+2026-04-14  Collin Funk  <collin.funk1@gmail.com>
+
+	version 1.10
+	* NEWS: Record release date.
+
+	doc: NEWS: revise an entry
+	* NEWS: Revise entry after commit f80db1e (time: make use of
+	close-on-exec, 2026-04-12).
+
+	test: don't assume that 'false' exits with a status of 1
+	On Solaris 10 it has an exit status of 255.
+	* tests/time-posix-quiet.sh: Check for a non-zero return value instead
+	of 1.
+
+2026-04-13  Collin Funk  <collin.funk1@gmail.com>
+
+	build: handle getrusage RSS units on DragonFly
+	* configure.ac (time_getrusage_mem_units): Set it to kb.
+
+	time: fix build with older versions of GCC
+	* src/time.c (default_format): Improve code formatting.
+	(output_format): Don't initialize to default_format.
+	(getargs): Set output_format here.
+
+	tests: make sure we don't use the time builtin
+	* tests/time-format-T.sh: Use env when invoking time.
+
+2026-04-13  Collin Funk  <collin.funk1@gmail.com>
+
+	tests: allocate more memory for RSS tests
+	This test fails spuriously. Make it allocate 50MB instead of 5MB in
+	hopes of making it more consistent.
+
+	* tests/time-max-rss.sh: Allocate 50MB of memory and check for values
+	from 50MB to 60MB reported for RSS.
+
+2026-04-13  Collin Funk  <collin.funk1@gmail.com>
+
+	build: update gnulib submodule to latest
+
+2026-04-13  Andreas Schwab  <schwab@suse.de>  (tiny change)
+
+	tests: time-aux: fix unintented expression grouping
+	The compiler warns about a likely unintented expression grouping:
+
+	tests/time-aux.c:245:21: warning: suggest parentheses around '+' in operand of '&' [-Wparentheses]
+	  245 |     getcwd (buf, 10 + (pid+ppid+uid+euid+gid+egid)&0xF);
+	      |                  ~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	Given how the expression is formatted, it is more likely the author
+	intented the '&' operator to only apply to the parenthesized
+	subexpression.
+
+2026-04-12  Collin Funk  <collin.funk1@gmail.com>
+
+	time: prefer fputs to fprintf for strings without format directives
+	* src/time.c (summarize): Use fputs instead of fprintf to avoid locking.
+
+	time: make use of close-on-exec
+	* bootstrap.conf (gnulib_modules): Add fopen-gnu.
+	* src/time.c (getargs): Use the 'e' mode character when calling fopen.
+	(run_command): Remove the fclose call.
+
+	tests: add tests for the --append option
+	* tests/time-append.sh: New file.
+	* tests/local.mk (all_tests): Add the new test.
+
+2026-04-11  Collin Funk  <collin.funk1@gmail.com>
+
+	time: prefer unlocked stdio functions
+	* NEWS: Mention the improvement.
+	* bootstrap.conf (gnulib_modules): Add unlocked-io.
+	* src/system.h: Include unlocked-io.h.
+
+	time: use distinct error messages for waitpid and getrusage failures
+	* src/resuse.c: Remove file.
+	* src/local.mk (src_time_SOURCES): Remove src/resuse.c.
+	* src/resuse.h (resuse_end, resuse_start): Remove declarations.
+	* src/time.c (run_command): Call waitpid and getrusage here and check
+	them separately for errors.
+
+2026-03-28  Collin Funk  <collin.funk1@gmail.com>
+
+	build: use Gnulib's lib-ignore module
+	* src/local.mk (AM_LDFLAGS): New variable.
+	* bootstrap.conf (gnulib_modules): Add lib-ignore.
+
+2026-02-11  Collin Funk  <collin.funk1@gmail.com>
+
+	build: use gnulib's manywarnings module
+	* bootstrap.conf (gnulib_modules): Add manywarnings.
+	* cfg.mk (AM_CFLAGS, src_CFLAGS, lib_CFLAGS): Add warning flags.
+	* configure.ac: Enable warnings by default when building from git.
+	Mostly copied from coreutils.
+	(GNULIB_NO_VLA): Define to avoid VLAs.
+
+	maint: prefer NULL to 0
+	* src/time.c (getargs): Use NULL instead of 0. Check for getopt
+	returning -1 instead of EOF.
+
+2026-02-08  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: use 'cksum' style checksums for release announcements
+	* cfg.mk (url_dir_list, bootstrap-tools, announce_gen_args): New
+	variables.
+
+2026-02-07  Collin Funk  <collin.funk1@gmail.com>
+
+	build: distribute xz compressed tarballs
+	* configure.ac (AM_INIT_AUTOMAKE): Add dist-xz.
+
+	maint: setup requirements for gendocs.sh
+	* .gitignore: Add directory created by 'make web-manual'.
+	* bootstrap.conf (gnulib_modules): Add gnu-web-doc-update.
+	* cfg.mk (manual_title): New variable.
+	* doc/.gitignore: Add files created by 'make web-manual'.
+
+2026-02-06  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: use Gnulib's readme-release module
+	* bootstrap.conf (gnulib_modules): Add readme-release.
+	(bootstrap_epilogue): Add the recommended perl one-liner.
+	* .gitignore: Add it.
+	* doc/.gitignore: Add files imported by Gnulib.
+
+2026-02-03  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: remove an outdated comment
+	* src/time.c (usage): Remove comment.
+
+	doc: NEWS: mention the bug fixed by previous commit
+	* NEWS: Mention that 'time --help' no longer prints duplicate percent
+	signs in the description of --portability option.
+
+2026-02-03  Dominique Martinet  <asmadeus@codewreck.org>  (tiny change)
+
+	time: fix double percent signs in --help output
+	* src/time.c (usage): Remove extra percent characters.
+
+2026-02-03  Collin Funk  <collin.funk1@gmail.com>
+
+	doc: improve the document title
+	* doc/time.texi: Include the version number in the title as required by
+	the GNU Coding Standards. Adjust some text and options to match what
+	coreutils has.
+
+	doc: suggest 'git format-patch' for contributing changes
+	* doc/time.texi (Reporting bugs): Suggest 'git format-patch' instead of
+	'diff -c' for contributing patches.
+
+2026-02-01  Collin Funk  <collin.funk1@gmail.com>
+
+	tests: enable logging for test failures
+	* cfg.mk (VERBOSE): New variable.
+	* tests/local.mk (TEST_SUITE_LOG, VERBOSE): Likewise.
+
+	tests: add a test for the previous commit
+	* tests/time-trailing-backslash.sh: New file.
+	* tests/local.mk (all_tests): Add the new test.
+
+2026-02-01  Petr Písař  <ppisar@redhat.com>
+
+	time: handle trailing backslashes in the format string
+	Reported by Denys Vlasenko <vda.linux@googlemail.com> in
+	<https://lists.gnu.org/r/bug-time/2024-01/msg00000.html>.
+
+	* src/time.c (summarize): Don't append the program name when the format
+	string contains a trailing backslash.
+	* NEWS: Mention the bug fix.
+
+2026-01-31  Collin Funk  <collin.funk1@gmail.com>
+
+	tests: check that standard error is not closed in the child process
+	* tests/time-child-stderr.sh: New file.
+	* tests/local.mk (all_tests): Add the new tests.
+
+2026-01-31  Petr Písař  <ppisar@redhat.com>
+
+	time: close the file specified by --output in the child process
+	* NEWS: Mention the bug fix.
+	* src/time.c (run_command): Close the outfp if it is not standard error.
+
+	Reported-by: Ed Santiago <santiago@redhat.com>
+
+2026-01-31  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: use proper accents in names
+	* AUTHORS: Write François instead of Francois.
+	* src/resuse.c: Likewise.
+
+2026-01-30  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: use '...' instead of `...'
+	* README: Replace backticks with a single quote.
+	* src/time.c: Likewise.
+
+2026-01-29  Collin Funk  <collin.funk1@gmail.com>
+
+	time: don't list -h as a supported option in --help
+	* NEWS: Mention the bug fix.
+	* src/system.h: Include limits.h.
+	(GETOPT_HELP_CHAR): New definition, copied from coreutils.
+	* src/time.c (longopts): Use GETOPT_HELP_CHAR instead of 'h' which is
+	misleading since the short option isn't used.
+	(usage): Don't list -h in the output.
+	(getargs): Use GETOPT_HELP_CHAR. Adjust formatting.
+
+	time: only call getenv when needed
+	* src/time.c (getargs): Avoid calling getenv if --verbose,
+	--portability, or --format is used.
+
+	time: prefer static initialization
+	* src/time.c (verbose, outfile, outfp, append, output_format)
+	(quiet): Initialize statically instead of in getargs.
+
+2026-01-27  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: copy builtin warning from coreutils
+	* src/system.h: New file.
+	* src/local.mk (noinst_HEADERS): New variable.
+	* src/time.c (_): Move definition to src/system.h.
+	(usage): Use USAGE_BUILTIN_WARNING.
+
+2026-01-26  Collin Funk  <collin.funk1@gmail.com>
+
+	doc: fix the bug reporting address
+	Reported by Keith Thompson <Keith.S.Thompson@gmail.com> in
+	<https://lists.gnu.org/r/bug-time/2026-01/msg00004.html>.
+
+	* doc/time.texi (Reporting bugs): Correct the email address.
+
+2026-01-26  Collin Funk  <collin.funk1@gmail.com>
+
+	tests: add tests for the --verbose option
+	* tests/time-verbose.sh: New file.
+	* tests/local.mk (all_tests): Add the new test.
+
+2026-01-25  Collin Funk  <collin.funk1@gmail.com>
+
+	tests: add tests for the TIME environment variable
+	* tests/time-environment.sh: New file.
+	* tests/local.mk (all_tests): Add the new test.
+
+	maint: have gnulib-tool create symlinks
+	* bootstrap.conf (gnulib_tool_option_extras): Add --symlink.
+
+	maint: add some files to the tarball
+	* Makefile.am (EXTRA_DIST): Add bootstrap, bootstrap.conf, cfg.mk, and
+	maint.mk.
+
+2026-01-24  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: use the correct program name in bug reporting guide
+	* doc/time.texi (Reporting bugs): Mention time instead of Datamash. Add
+	'env' invocation to avoid using the shell builtin.
+
+	maint: remove form feeds from sources
+
+	time: define units used for ru_maxrss on Haiku
+	* configure.ac: Set time_getrusage_mem_units to 'kb' on Haiku. Mention
+	that this unit can also be used for systems that initialize it to zero.
+
+2026-01-20  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: avoid allocating --verbose format on the heap
+	* src/time.c (longstats): Remove variable.
+	(verbose_format): New variable based on longstats but stored as a
+	string.
+	(getargs): Use verbose_format.
+	(linear_argv): Remove function.
+
+2026-01-19  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: prefer current_timespec over gettimeofday
+	The gettimeofday function was removed by POSIX.1-2024. Using
+	current_timespec also allows 'time' to show higher resolution times in
+	the future. But this patch leaves that unchanged.
+
+	* bootstrap.conf (gnulib_modules): Remove gettimeofday. Add gettime and
+	timespec-sub.
+	* src/local.mk (src_time_LDADD): Add $(CLOCK_TIME_LIB)
+	* src/resuse.c: Include timespec.h.
+	(resuse_start, resuse_end): Use current_timespec.
+	* src/resuse.h (struct RESUSE): Use struct timespec members instead of
+	struct timeval.
+	* src/time.c: Include timespec.h.
+	(summarize): Calculate the elapsed time using timespec_sub. Adjust
+	conversions to work on the units stored in struct timespec.
+
+2026-01-18  Collin Funk  <collin.funk1@gmail.com>
+
+	build: move src targets to an included makefile.
+	* src/local.mk: New file.
+	* Makefile.am (AM_CPPFLAGS, lib_libtime_a_CPPFLAGS)
+	(lib_libtime_a_CFLAGS, noinst_LIBRARIES, nodist_src_libver_a_SOURCES)
+	(bin_PROGRAMS, time_SOURCES, time_CFLAGS, time_LDADD, src/version.c)
+	(src/version.h): Remove targets and variables that were moved to
+	src/local.mk.
+	* tests/local.mk (TEST_ENVIRONMENT): Export srcdir instead of test_dir.
+	* tests/help-version.sh: Adjust program path.
+	* tests/time-exit-codes.sh: Likewise.
+	* tests/time-format-T.sh: Likewise.
+	* tests/time-max-rss.sh: Likewise.
+	* tests/time-posix-quiet.sh: Likewise.
+	* .gitignore: Likewise.
+
+	build: move test targets into an included Makefile
+	* tests/local.mk: New file.
+	* Makefile.am (check_PROGRAMS, tests_time_aux_SOURCES)
+	(tests_time_aux_CPPFLAGS, tests_time_aux_CFLAGS, TESTS, TEST_EXTENSIONS)
+	(EXTRA_DIST, TESTS_ENVIRONMENT): Remove targets and variables that were
+	moved to tests/local.mk. Include tests/local.mk.
+
+	doc: generate a single html file by default
+	* doc/local.mk (AM_MAKEINFOFLAGS): New variable.
+	* doc/.gitignore: Use "/time.html" instead of "/time.html/" since it is
+	no longer a directory.
+
+	build: move doc targets into an included Makefile
+	* doc/.gitignore: New file.
+	* doc/local.mk: New file.
+	* Makefile.am (doc_time_TEXINFOS, info_TEXINFOS): Remove targets that
+	were moved to doc/local.mk. Include doc/local.mk.
+
+2026-01-18  Collin Funk  <collin.funk1@gmail.com>
+
+	doc: NEWS: mention that time can be built using a C23 compiler
+	This was fixed in 4bfc492 (maint: fix compilation errors with GCC 15,
+	2026-01-12).
+
+	* NEWS: Mention the improvement.
+
+2026-01-15  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: prefer EXIT_FAILURE over 1 when calling error
+	* src/time.c (fprintargv, summarize, run_command): Use EXIT_FAILURE
+	instead of 1.
+
+2026-01-15  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: add copyright notices to all files
+	Add copyright notices to all non-trivial files as required by
+	Information for Maintainers of GNU Software. GNU Time is older than its
+	version control history, but all of these files have likely existed
+	since the beginning. Although, they have have exited under a different
+	name, e.g., configure.ac used to be named configure.in. Therefore, the
+	years for the copyright notices are taken from src/time.c.
+
+	* Makefile.am: Add a copyright notice.
+	* NEWS: Likewise.
+	* README: Likewise.
+	* configure.ac: Likewise.
+	* ChangeLog-2015: Likewise.
+	* cfg.mk (old_NEWS_hash): Update using 'make update-NEWS-hash'.
+
+2026-01-15  Collin Funk  <collin.funk1@gmail.com>
+
+	time: prefer waitpid and getrusage to wait3
+	* NEWS: Mention the improvement.
+	* bootstrap.conf (gnulib_modules): Add waitpid.
+	* configure.ac: Remove AC_FUNC_WAIT3 invocation.
+	* doc/time.texi (Accurage): Reference waitpid and getrusage instead of
+	wait3.
+	* src/resuse.c (HZ): Remove definitions.
+	(reuse_start): Remove fallback for if wait3 is missing.
+	(resuse_end): Likewise. Use waitpid and getrusage instead of wait3.
+
+2026-01-14  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: use 'git-version-gen' to generate string for --version
+	* .prev-version: New file.
+	* .gitignore (.version, /src/version.c, /src/version.h): Ignore
+	generated files.
+	* Makefile.am (EXTRA_DIST): Add .prev-version and .version.
+	(noinst_LIBRARIES, nodist_src_libver_a_SOURCES): New variable.
+	(time_LDADD): Add src/libver.a.
+	(src/version.c, src/version.h, .version): New targets.
+	(BUILT_SOURCES): Add them.
+	(MAINTAINERCLEANFILES): Likewise.
+	(dist-hook): Generate $(distdir)/.tarball-version.
+	* cfg.mk (old_NEWS_hash): Update using 'make update-NEWS-hash'.
+	* configure.ac (AC_INIT): Add tarball name.
+	* src/time.c: Include version.h.
+	(Version): Remove definition.
+
+	maint: generate the ChangeLog from 'git log'
+	* ChangeLog-2015: New file containing existing ChangeLog entries.
+	* Makefile.am (EXTRA_DIST): Add ChangeLog-2015.
+	(gen-ChangeLog): New rule.
+	(dist-hook): Depend on it.
+
+2026-01-13  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: adjust to Gnulib module renaming.
+	Gnulib changed the module name of header files to consistently use the
+	"-h" suffix. This change only updates the existing dependencies names to
+	the current non-deprecated versions.
+
+	* bootstrap.conf (gnulib_modules): Adjust module names and then sort the
+	list.
+	* src/time.c: Remove stdbool.h include since Gnulib defines "bool" in
+	config.h.
+
+2026-01-13  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: remove stdnoreturn gnulib module
+	The module is deprecated. Prefer _Noreturn which Gnulib defines in
+	config.h if needed.
+
+	* bootstrap.conf (gnulib_modules): Remove stdnoreturn.
+	* src/time.c: Don't include stdnoreturn.h.
+	(usage): Use _Noreturn instead of noreturn.
+
+2026-01-13  Collin Funk  <collin.funk1@gmail.com>
+
+	build: remove use of non-recursive-gnulib-prefix-hack
+	Reported by Bruno Haible <bruno@clisp.org> in
+	<https://lists.gnu.org/r/bug-time/2022-07/msg00000.html>.
+
+	* bootstrap.conf (gnulib_modules): Remove
+	non-recursive-gnulib-prefix-hack.
+	(gnulib_tool_option_extras): Pass --automake-subdir to 'gnulib-tool'.
+	(bootstrap_post_import_hook): Remove invocation of 'prefix-gnulib-mk'.
+
+2026-01-13  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: import tests/init.sh from Gnulib during bootstrap
+	* bootstrap.conf (bootstrap_post_import_hook): Use gnulib-tool
+	--copy-file to import tests/init.sh.
+	* tests/init.sh: Remove file.
+	* .gitignore (/tests/init.sh): Add entry.
+
+	maint: run 'make update-copyright'
+	* README: Add note about copyright intervals as required by the GNU
+	Coding Standards.
+	* cfg.mk (update-copyright-env): Set UPDATE_COPYRIGHT_USE_INTERVALS to 1
+	instead of 2.
+
+	maint: fix 'make syntax-check' after gnulib update
+	* NEWS: Fix typo.
+	* README: Mention COPYING file as required by the GNU Coding Standards
+	and checked by sc_readme_link_copying.
+	* cfg.mk (local-checks-to-skip): Add sc_indent.
+	(codespell_ignore_words_list): Ignore false-positives.
+	* doc/time.texi (Termination Status): Fix a typo.
+	* tests/time-max-rss.sh: Likewise.
+	* tests/time-posix-quiet.sh: Likewise.
+	* src/resuse.h: Likewise.
+	* src/time.c: Likewise. Include <error.h> instead of "error.h" to make
+	sc_prefer_angle_bracket_headers pass.
+
+	build: update gnulib submodule to latest
+	* bootstrap: Update using './bootstrap --bootstrap-sync'.
+	* .gitignore: Remove duplicate "/build-aux" entry that causes
+	'./bootstrap' to fail. Gnulib files added by './bootstrap'.
+
+	maint: fix 'make syntax-check'
+	* NEWS: Add header line for next release.
+	* cfg.mk (old_NEWS_hash): Update using 'make update-NEWS-hash'.
+	(local-checks-to-skip): Add sc_bindtextdomain and
+	sc_unmarked_diagnostics.
+	(exclude_file_name_regexp--sc_require_config_h_first): Don't run the
+	check on C tests which do not use Gnulib.
+	(exclude_file_name_regexp--sc_require_config_h): Likewise.
+	* src/rusage-kb.c: Include <config.h> instead of "config.h" so
+	sc_require_config_h and sc_require_config_h_first pass. Remove trailing
+	whitespace to make sc_trailing_blank pass.
+	* src/resuse.c: Likewise. Remove preprocessor parentheses to make
+	sc_useless_cpp_parens pass.
+	* src/time.c: Likewise. Use spaces instead of tabs to make sc_space_tab
+	pass.
+	(longopts): Add const to make sc_const_long_option pass.
+	* tests/time-aux.c (usage): Use EXIT_SUCCESS instead of 0 to make
+	sc_prohibit_magic_number_exit pass.
+	* doc/time.texi: Remove duplicate "the" to make sc_prohibit_doubled_word
+	pass.
+	* .gitignore: Add newline to the end of file to make
+	sc_prohibit_empty_lines_at_EOF pass.
+
+2026-01-13  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: copy fdl.texi instead of using the gnulib module
+	Using the module gives the following message:
+
+	    $ gnulib-tool --extract-notice fdl
+	        Don't use this module! Instead, copy the referenced license \
+	        file into your version control repository.
+
+	* bootstrap.conf (gnulib_modules): Remove fdl.
+	* doc/fdl.texi: Add file from Gnulib.
+	* .x-update-copyright: New file.
+
+2026-01-12  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: remove obsolete autoconf macros
+	* configure.ac (AC_PROG_CC): Call instead of AC_PROG_CC_STDC and
+	AC_PROG_GCC_TRADITIONAL.
+	(AC_CHECK_INCLUDES_DEFAULT, AC_PROG_EGREP): Use instead of
+	AC_HEADER_STDC.
+
+2026-01-12  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: fix compilation errors with GCC 15
+	GCC 15 changed the default to -std=gnu23 where the current code would
+	cause -Wincompatible-pointer-types errors.
+
+	Reported by Ondrej Pohorelsky <opohorel@redhat.com> in
+	<https://lists.gnu.org/r/bug-time/2025-01/msg00000.html>
+	and by Khem Raj <raj.khem@gmail.com> in
+	<https://lists.gnu.org/r/bug-time/2025-03/msg00000.html>
+	and by Marcin Serwin <marcin@serwin.dev> in
+	<https://lists.gnu.org/r/bug-time/2025-10/msg00000.html>
+	and by Sam James <sam@gentoo.org> in
+	<https://savannah.gnu.org/bugs/?66450>.
+
+	* configure.ac (AC_TYPE_SIGNAL): Remove obsolete macro.
+	* src/time.c (sighandler): Remove type.
+	(run_command): Use sighandler_t which is defined by glibc or provided by
+	Gnulib.
+
+2026-01-12  Collin Funk  <collin.funk1@gmail.com>
+
+	maint: remove K&R declarations
+	* src/resuse.c (resuse_start, resuse_end): Remove K&R declarations.
+	* src/time.c (fprintargv, linear_argv, summarize, getargs)
+	(main): Likewise.
+	(run_command): Likewise. Avoid -Wincompatible-pointer-types.
+
+2021-01-05  Assaf Gordon  <assafgordon@gmail.com>
+
+	maint: update copyright year
+	Run "make update-copyright" and then:
+	* gnu: Update to latest.
+	* bootstrap,tests/init.sh: Sync with latest gnulib version.
+
+2020-01-01  Assaf Gordon  <assafgordon@gmail.com>
+
+	maint: update copyright date to 2020
+	* all files: Run "make update-copyright".
+
+2019-10-27  Assaf Gordon  <assafgordon@gmail.com>
+
+	doc: document %Tt,%Tx,%Tn,%Ts,%To format specifiers
+	* doc/time.texi (Termination Status): Add documentation.
+
+	tests: add %Tt,%Ts,%Tn,%Tx,%To format checks
+	* tests/time-format-T.sh: New tests.
+	* Makefile.am (TESTS): Add new test script.
+
+2019-10-27  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: add %Tt,%Ts,%Tn,%Tx,%To output format specifiers
+	New format specifiers:
+
+	  %Tt = the strings 'normal' or 'signalled' or 'stopped' based on how
+	        the program exited.
+	  %Tx = numeric exit code IF the program exited normally (not signalled).
+	        Empty otherwise.
+	  %Tn = numeric signal number IF the program was terminated by a signal.
+	        Empty otherwise.
+	  %Ts = signal name IF the program was terminated by a signal.
+	        Empty otherwise.
+	  %To = 'ok' if program terminated normally (not signalled) and with
+	        exit code zero. Empty otherwise.
+
+	Examples:
+
+	  $ FMT="exit type: %Tt\nexit code: %Tx\nsig-spec: %Ts\nsig-num:%Tn\nok?: %To"
+
+	  $ time -q -f "$FMT" ./tests/time-aux -S KILL
+	  exit type: signalled
+	  exit code:
+	  sig-spec: KILL
+	  sig-num: 9
+	  ok?:
+
+	  $ time -q -f "$FMT" ./tests/time-aux -e 4
+	  exit type: normal
+	  exit code: 4
+	  sig-spec:
+	  sig-num:
+	  ok?:
+
+	  $ time -q -f "$FMT" true
+	  exit type: normal
+	  exit code: 0
+	  sig-spec:
+	  sig-num:
+	  ok?: ok
+
+	* bootstrap.conf: Add gnulib's sig2str module.
+	* src/time.c (summarize): Handle %Tx/%Ts/%Tn/%Tx/%To specifiers.
+	(usage): Mention new specifiers.
+
+2019-10-27  Assaf Gordon  <assafgordon@gmail.com>
+
+	tests: time-aux: add -S option (terminate by signal)
+	Allow 'time-aux' to terminate by a singal,
+	either a number, or the exact words KILL/TERM/STOP/INT/SEGV
+
+	Examples:
+
+	  $ ./tests/time-aux -s 2s -S SEGV
+	  Segmentation fault
+
+	  $ ./tests/time-aux -S KILL
+	  Killed
+
+2019-10-27  Assaf Gordon  <assafgordon@gmail.com>
+
+	build: work-around automake 1.16 regression with non-gnu make
+	Discussed in https://lists.gnu.org/r/automake/2019-08/msg00000.html
+	Solved by Bruno Haible:
+	https://lists.gnu.org/r/automake/2019-08/msg00005.html
+	https://lists.gnu.org/r/bug-gnulib/2019-08/msg00064.html
+
+	* Makefile.am (LDADD): Remove $(top_builddir) from library path.
+
+2019-10-16  Assaf Gordon  <assafgordon@gmail.com>
+
+	maint: re-indentation
+	* src/time.c (summarize): Automatic re-indentation. No code changes.
+
+2019-01-01  Assaf Gordon  <assafgordon@gmail.com>
+
+	maint: update copyright years
+	* all files: Run "make update-copyright"
+	* gnulib: Update to latest.
+	* bootstrap, tests/init.sh: Sync to latest from gnulib.
+
+2018-03-19  Assaf Gordon  <assafgordon@gmail.com>
+
+	tests: fix typo
+	Reported by Nelson H. F. Beebe.
+
+	* tests/time-max-rss.sh: Fix 'allocation' typo.
+
+2018-03-12  Assaf Gordon  <assafgordon@gmail.com>
+
+	doc: update version/release date in NEWS
+
+	gnulib: update to latest
+
+2018-03-06  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: fix incorrect --help information
+	Reported by Timothee Cour in
+	https://lists.gnu.org/r/bug-time/2018-02/msg00000.html
+
+	* src/time.c (usage): Fix incorrect STDOUT to STDERR.
+
+2018-03-06  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: report CPU usage for programs lasting less than 1 second
+	If a program lasts less than 1 second, fallback to calculate percent
+	CPU usage based on nanosecond measurements.
+
+	Suggested by Petr Pisar at
+	https://lists.gnu.org/r/bug-time/2018-01/msg00000.html
+	Based on Fedora patch:
+	https://src.fedoraproject.org/rpms/time/blob/master/f/time-1.8-Recompute-CPU-usage-at-microsecond-level.patch
+
+	* NEWS: Mention this.
+	* time.c (summarize): Calculate CPU usage based on nanoseconds if
+	  elapsed seconds are zero.
+	* tests/time-aux.c: Add busy loop, kernel loop, sleep loop options;
+	  add help screen.
+
+2018-01-03  Assaf Gordon  <assafgordon@gmail.com>
+
+	maint: update copyright year to 2018
+	* all files: Update with 'make update-copyright'.
+
+	maint: fix copyright holder in tests
+	* tests/help-version.sh, tests/time-exit-codes.sh,
+	  tests/time-max-rss.sh, tests/time-posix-quiet.sh: Fix copyright holder
+	  to FSF (GNU Time requires copyright assignment).
+
+	maint: add gnulib's update-copyright module
+	* bootstrap.conf: Add 'update-copyright,maintainer-makefile modules.
+	* cfg.mk: Set update-copyright envvars.
+
+	gnulib: update to latest
+
+2017-11-09  Assaf Gordon  <assafgordon@gmail.com>
+
+	tests: fix incorrect output comparison in -q/-p modes
+	The expected %CPU value can be '0','100' or '?' (for as small a program
+	as 'false'). Remove any of these values, including the question mark
+	before comparing the expected output.
+
+	Reported by Petr Pisar in
+	http://lists.gnu.org/archive/html/bug-time/2017-11/msg00007.html
+	http://lists.gnu.org/archive/html/bug-time/2017-11/msg00008.html
+
+	* tests/time-posix-quiet.sh (remove_numeric_values): Refactor the sed command
+	into a function instead of duplicating it; Also remove the '?'
+	character. Adjust expected output accordingly.
+
+2017-11-08  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: use noreturn to pacify gcc-7
+	Reported by Jim Meyering in
+	https://lists.gnu.org/archive/html/bug-time/2017-11/msg00000.html .
+
+	gcc-7 with --enable-gcc-warnings would warn about:
+
+	  src/time.c: In function 'getargs':
+	  src/time.c:664:4: warning: this statement may fall through
+	  [-Wimplicit-fallthrough=]
+	      usage (EXIT_SUCCESS);
+	      ^~~~~~~~~~~~~~~~~~~~
+	  src/time.c:665:2: note: here
+	    case 'o':
+	    ^~~~
+
+	This is a false-positive as usage() calls exit(3) and never returns
+	(but gcc seems unable to deduce that).
+
+	Use noreturn to suppress the warning.
+
+	* bootstrap.conf: Add gnulib's stdnoreturn module.
+	* src/time.c (usage): Mark as 'noreturn'.
+
+2017-11-08  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: remove "Command exited with non-zero status" in POSIX (-p) mode
+	Suggested by Petr Pisar in
+	https://lists.gnu.org/archive/html/bug-time/2017-11/msg00001.html .
+
+	* src/time.c (summarize): Don't print the message in posix mode.
+	* tests/time-posix-quiet.sh: Test the output with -p and -q.
+	* Makefile.am (TESTS): Add new test.
+	* NEWS: Mention change.
+
+2017-11-07  Assaf Gordon  <assafgordon@gmail.com>
+
+	build: add missing texi support files
+	Makefile.am: Add doc/{fdl,version}.texi to distributed file list.
+
+	build: disable tar.xz archive
+	* configure.ac: Remove 'dist-xz', gzip archive is sufficient for now.
+
+	doc: update release date in NEWS
+
+2017-10-11  Assaf Gordon  <assafgordon@gmail.com>
+
+	doc: update manual's license to GNU FDL 1.3
+	* doc/time.texi: Replace licensing paragraph with standard text
+	  (with no invariant sections, same as GNU coreutils/grep/sed);
+	  Include the FDL.texi file as Appendix A.
+
+	doc: update NEWS with recent changes
+
+2017-08-20  Assaf Gordon  <assafgordon@gmail.com>
+
+	build: improve configure.ac
+	Reorder statements to match coreutils' configure.ac.
+	Require autoconf 2.69 (up from 2.62).
+	Add AC_C_INLINE as suggested by Bruno Haible in
+	https://lists.gnu.org/archive/html/bug-time/2017-08/msg00005.html .
+	Add AC_USE_SYSTEM_EXTENSIONS to avoid bootstrapping errors.
+
+	* configure.ac: General improvements.
+
+2017-08-20  Assaf Gordon  <assafgordon@gmail.com>
+
+	doc: remove explicit section listing from top @menu
+	These nodes confuse newer texinfo, resutling in:
+	./doc/time.texi:153: warning: node `Resource Measurement' is prev for
+	                    `Setting Format' in menu but not in sectioning
+	./doc/time.texi:242: warning: node `Invoking time' is prev for `Time
+	                    Resources' in menu but not in sectioning
+	./doc/time.texi:473: warning: node `Time Resources' is next for
+	                    `Invoking time' in menu but not in sectioning
+
+	And likely leading to the info navigation problem reported by Bruno
+	Haible in:
+	https://lists.gnu.org/archive/html/bug-time/2017-08/msg00002.html
+
+	* doc/time.texi (@menu): Remove explicit listing of section nodes in the
+	top menu.
+
+2017-08-20  Assaf Gordon  <assafgordon@gmail.com>
+
+	tests: avoid strtof() in auxiliary C program
+	strtof() is not portable enough (e.g. missing on HP-UX).
+	Reported by Bruno Haible in
+	http://lists.gnu.org/archive/html/bug-time/2017-08/msg00004.html .
+
+	Also remove unused variables, reported by Bruno in
+	https://lists.gnu.org/archive/html/bug-time/2017-08/msg00001.html .
+
+	* tests/time-aux.c (do_busy_loop, do_malloc): replace strtof with strtol
+	(at the cost of not accepting floating-point values).
+
+2017-08-06  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: avoid printf-format warnings
+	Force 'long int' type for '%ld' specifiers (e.g. OpenBSD's time_t is not
+	'long int').
+
+	* src/time.c: (summarize) Type case time_t to lont int.
+
+2017-08-06  Assaf Gordon  <assafgordon@gmail.com>
+
+	tests: skip maxrss tests when inapplicable
+	On some systems (e.g. OpenSolaris) getrusage(2) always return zero in
+	ru_maxrss. Skip the test (instead of failing).
+
+	* tests/time-max-rss.sh: Detect zero maxrss and skip the test.
+
+2017-08-06  Assaf Gordon  <assafgordon@gmail.com>
+
+	maint: .gitignore more files
+
+	build: use gnulib's signal-h module
+
+	time: remove unused UL (unsigned long) macro
+
+	build: use gnulib's progname module
+	* bootstrap.conf: Add progname.
+	* src/time.c (main): Call 'set_program_name'. Remove global variable.
+
+	build: use gnulib's stdbool
+	* bootstrap.conf: Add stdbool.
+	* src/time.c: Replace 'enum boolean' with bool.
+
+2017-08-06  Assaf Gordon  <assafgordon@gmail.com>
+
+	tests: test exit-code propagation
+	Ensure time(1) correctly reports the exit code of the monitored programs.
+
+	* tests/time-exit-codes.sh: New test.
+	* Makefile.am (TESTS): Add new test.
+
+2017-08-06  Assaf Gordon  <assafgordon@gmail.com>
+
+	tests: add 'time-aux' program, tests max-rss reporting
+	* .gitignore: Ignore more files.
+	* Makfile.am (check_PROGRAMS): Build time-aux with suitible CFLAGS.
+	(TESTS): Add time-max-rss.sh.
+	* tests/time-aux.c: New program.
+	* tests/time-max-rss.sh: New test script.
+
+	maint: git-ignore more files
+
+	tests: use automake's test framework
+	* .gitignore: Ignore test output files
+	* tests/init.sh: Copied from gnulib.
+	* tests/help-version.sh: Test --help/--version.
+	* Makefile.am (TESTS, TESTS_ENVIRONMENT, EXTRA_DIST): Adjust as needed.
+
+	build: use gnulib's git-version-gen module
+
+	time: adjust pages-vs-kb calculations for modern systems
+	* configure.ac: Define GETRUSAGE_RETURNS_{KB,BYTES,PAGES} based on $host_os.
+	* bootstrap.conf: Add gnulib's inttpyes (for PRIuMAX).
+	* src/rusage-kb.{c,h}: Wrapper functions to convert 'struct rusage'
+	memory fields to kilobytes, based on GETRUSAGE_RETURNS_*.
+	The ptok() function moved here (and is conditionally compiled).
+	* Makefile.am: Add rusage-kb.{c,h}.
+	* src/time.c: Use new wrapper functions to print memory usage.
+
+2017-07-09  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: add -q/--quiet option
+	Supress message about abnormal program termination (e.g. non-zero exit
+	codes or signals).
+	Inspired by Debian's downstream patch by Dirk Eddelbuettel at
+	https://bugs.debian.org/56853 .
+	Note Debian's patch suppressed only non-zero exit codes but still
+	printed messages upon signals. This patch supresses all messages, also
+	in case of signals.
+
+2017-07-09  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: improve exit code upon various failures and signals
+	Use the following exit codes (similar to coreutils'):
+	125 (EXIT_CANCELED) = Wrong usage or internal error prior to exec attempt.
+	126 (EXIT_CANNOT_INVOKE) = Program located, but not usable.
+	127 (EXIT_NOENT) = Could not find program to exec.
+
+	Additionally, if the program terminates abnormally (e.g. signalled) then
+	time will terminate with exit code (128 + the signal number). This is
+	consistent with what sh does, and how coreutils' timeout(1) behaves.
+
+2017-07-09  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: use gnulib's version-etc module for --version info
+	Note: gnulib's 'propername' module isn't used, as it doubles the size
+	of the executable (additional 10K of .text).
+
+	* bootstrap.conf: Use gnulib's version-etc{-fsf} modules.
+	* Makefile.am: Set MAINTAINERCLEANFILES variable.
+	* src/time.c: Add AUTHORS, Call version-etc.
+
+2017-07-09  Assaf Gordon  <assafgordon@gmail.com>
+
+	time: rewrite -h/--help screen
+	Update -h/--help to conform to common gnu style.
+	Invalid usage now shows a shorter error message and suggests using
+	--help.
+
+	* src/time.c (usage): Complete rewrite.
+
+2017-07-07  Assaf Gordon  <assafgordon@gmail.com>
+
+	maint: update bug report email address
+
+	build: use gnulib's getrusage/sys_resource modules
+
+	build: use gnulib's sys_types,sys_wait modules
+
+	build: use gnulib's sys_time,gettimeofday modules
+
+	maint: remove texinfo.tex
+
+	maint: remove getpagesize.h
+	gnulib's unistd module ensures there is a valid getpagesize definition.
+
+	maint: remove port.h
+
+	build: use gnulib's string.h module
+
+	build: use gnulib's limits-h and stdlib modules
+
+	build: add gnulib's warning module
+
+	build: use gnulib's unistd module
+
+	maint: remove PARAMS() macro
+
+	build: use gnulib's getopt-gnu module
+
+	build: use gnulib's errno module
+
+	build: use gnulib's error module
+
+	build: first attempt at building with gnulib
+	Stub compilation, gnulib modules are not used by the main program yet.
+
+	build: add gnulib as git submodule
+
+	maint: rename 'lib' to 'lib2' in preparations for gnulib import
+
+	maint: remove unneeded files
+
+	maint: more files in .gitignore
+
+	maint: fix autoconf/config.h + version strings
+
+	maint: add .gitignore
+
+	maint: remove INSTALL,configure from git
+
+	maint: first attempt at modernizing configure.ac
+
+	maint: remove auto-generated version files from git
+
+	maint: rename configure.in -> .ac
+
+	maint: move files into subdirectories
+
+2015-01-22  David C Niemi  <niemi@tuxers.net>
+
+	1.7.3 RC1 update automake config
+
+	1.7.2
+
+2015-01-21  David C Niemi  <niemi@tuxers.net>
+
+	1.7.1 GPL 3
+
+	Initial Commit
